@@ -6,26 +6,29 @@ import re
 
 app = Flask(__name__)
 
-def extract_product_from_image(image_bytes):
-    #convert bytes to opencv images
-    nparr = np.frombuffer(image_bytes,np.uint8)
+def extract_products_from_image(image_bytes):
+    # Convert bytes to OpenCV image
+    nparr = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    # Preprocess for OCR
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
     text = pytesseract.image_to_string(thresh)
 
-    # PARSE Text to Products
+    # Parse text to products
     products = []
-    for line in text.split("/n"):
+    for line in text.split("\n"):
         line = line.strip()
         if not line:
             continue
-         price_match = re.search(r"\$\d+(\.\d{2})?", line)
+        price_match = re.search(r"\$\d+(\.\d{2})?", line)
         if price_match:
             price = price_match.group()
             name = line.replace(price, "").strip()
             products.append({"name": name, "price": price})
     return products
+
 @app.route("/")
 def index():
     return render_template("index.html")

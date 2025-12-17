@@ -1,37 +1,53 @@
+// Grab form and table elements
 const form = document.getElementById('upload-form');
-const table = document.getElementById('product-table');
-form.onsubmit = async (e) => {
-    e.preventDefault()
+const table = document.getElementById('products-table');
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault(); // prevent default form submission
+
     const fileInput = document.getElementById('leaflet');
+
+    if (!fileInput.files.length) {
+        alert("Please select an image file.");
+        return;
+    }
+
     const formData = new FormData();
     formData.append('leaflet', fileInput.files[0]);
-    try{
-        const response = await fetch('/upload',{
+
+    console.log("Uploading file...");
+
+    try {
+        const response = await fetch('/upload', {
             method: 'POST',
-            body : formData
-
+            body: formData
         });
-        const products = await response.json
-        // clear previous table rows
-        table.innerHTML=<tr><th>Name</th><th>Price</th></tr>;
-        
-        // Render new Products
-        products.foreach(product=>{
+
+        if (!response.ok) {
+            alert("Upload failed. Check console for details.");
+            console.error("Server response:", response.statusText);
+            return;
+        }
+
+        const products = await response.json();
+        console.log("Products received:", products);
+
+        // Clear existing table rows (except header)
+        table.innerHTML = '<tr><th>Name</th><th>Price</th></tr>';
+
+        // Populate table with products
+        products.forEach(product => {
             const row = table.insertRow();
-            row.insertcell(0).textcontext = product.name;
+            row.insertCell(0).textContent = product.name;
             row.insertCell(1).textContent = product.price;
-            row.onclick=()=> alert(`You selected: ${product.name}`);
+
+            row.addEventListener('click', () => {
+                alert(`You selected: ${product.name}`);
+            });
         });
-    } catch (err){
-        console.error("Upload failed:", err);
-    };
 
-
-
-
-
-
-
-
-
-}
+    } catch (err) {
+        console.error("Upload error:", err);
+        alert("An error occurred during upload.");
+    }
+});
