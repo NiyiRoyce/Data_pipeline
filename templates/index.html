@@ -1,0 +1,12 @@
+<h1>Upload Image</h1>
+<form id="upload-form" encytype="multipart/form-data" >
+    <input type="file" name="leaflet" id="leaflet" accept="Image/*" required>
+    <button type="submit">Upload</button>
+</form>
+
+<h2>Products</h2>
+<table id="products-table" border="1">
+    <tr><th>Name</th><th>Price</th></tr>
+</table>
+
+<script src="{{ url_for('static', filename='main.js') }}"></script>
